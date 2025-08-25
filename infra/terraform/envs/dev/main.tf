@@ -35,3 +35,25 @@ module "gke" {
   disk_type   = "pd-standard"
   zone        = "europe-west4-a"
 }
+
+module "sql" {
+  source        = "../../modules/sql"
+  enabled       = true
+  project       = var.project
+  region        = var.region
+  instance_name = "thedevops-dev-sql"
+  database_version = "POSTGRES_14"
+  tier = "db-f1-micro"
+  disk_size_gb = 10
+  ipv4_enabled = true
+}
+
+module "redis" {
+  source        = "../../modules/redis"
+  enabled       = true
+  project       = var.project
+  region        = var.region
+  instance_id   = "thedevops-dev-redis"
+  tier          = "BASIC"
+  memory_size_gb = 1
+}
