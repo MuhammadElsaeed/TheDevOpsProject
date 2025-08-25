@@ -18,9 +18,10 @@ resource "google_sql_database_instance" "this" {
     }
 
     disk_size = var.disk_size_gb
-
     ip_configuration {
       ipv4_enabled = var.ipv4_enabled
+      # If a private_network self_link is provided, use it to enable private IP
+      private_network = var.private_network != "" ? var.private_network : null
     }
   }
 }
@@ -30,6 +31,15 @@ resource "google_sql_database" "default_db" {
   name     = "appdb"
   project  = var.project
   instance = google_sql_database_instance.this[0].name
+}
+
+# Optionally create an application user with provided password
+resource "google_sql_user" "app_user" {
+  count    = local.create ? 1 : 0
+  name     = var.db_username
+  instance = google_sql_database_instance.this[0].name
+  project  = var.project
+  password = var.db_password
 }
 
 output "instance_connection_name" {

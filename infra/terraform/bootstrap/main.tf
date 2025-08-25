@@ -23,7 +23,9 @@ locals {
     "storage.googleapis.com",
     "cloudkms.googleapis.com",
     "redis.googleapis.com",
+  "secretmanager.googleapis.com",
     "artifactregistry.googleapis.com",
+    "servicenetworking.googleapis.com",
     "monitoring.googleapis.com",
     "logging.googleapis.com",
   ]

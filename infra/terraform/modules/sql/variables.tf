@@ -49,3 +49,15 @@ variable "private_network" {
   type    = string
   default = ""
 }
+
+variable "db_username" {
+  description = "Database user created for applications"
+  type        = string
+  default     = "appuser"
+}
+
+variable "db_password" {
+  description = "Password for the application database user (empty = skip creating user)"
+  type        = string
+  default     = ""
+}

@@ -38,3 +38,4 @@ variable "authorized_network" {
   type        = string
   default     = ""
 }
+
