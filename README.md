@@ -54,74 +54,93 @@ Stage 1 — Foundation (completed)
   - Ensure Terraform state is encrypted and access-limited.
 - Acceptance criteria / quality gates:
   - Terraform plan/apply succeeds for `dev` with minimal resources. (Done)
-  - Remote state created and locked in GCS. (Done)
-  - GKE cluster is reachable (kubectl config) from CI runner with Workload Identity configured. (Workload Identity pending)
+  # TheDevOpsProject
 
-Stage 2 — Platform Services
-- Goals: Provision Cloud SQL (Postgres) and Memorystore (Redis) with secure connectivity (private IP), backups, and maintenance windows via Terraform.
-- Deliverables: Terraform modules for `sql` and `redis`, secrets stored in Secret Manager, sample connection string output.
+  > Monorepo scaffold for a full DevOps demo on Google Cloud (Terraform, GKE, GitOps, CI/CD, observability, logging).
 
-Stage 3 — Sample App + CI/CD
-- Goals: Implement a small Node.js API and React frontend that use Postgres and Redis. Containerize with Docker (multi-stage builds). Add GitHub Actions workflows:
-  - On PR: run linters, unit tests, SCA (dependency scans), container image scanning, security checks.
-  - On push to `dev` branch: build images, push to Artifact Registry, update Argo CD/manifest (or create image tag) for automatic deploy to dev.
-  - On merge to `prod`: run promotion workflow, run integration tests, deploy to prod via Argo CD sync.
-- Use GitHub Advanced Security (code scanning, secret scanning) where available.
+  ## Quick summary
 
-Stage 4 — GitOps + Argo CD
-- Goals: Install Argo CD on GKE via Terraform (Helm provider / helmfile). Write Argo Application manifests to sync `k8s/manifests` from this repo. Demonstrate promotion (dev -> prod) workflow.
+  - Terraform-based IaC for GCP (remote state in GCS).
+  - Minimal private GKE clusters for `dev` and `prod`.
+  - GitHub Actions for CI (Terraform checks scaffolded).
+  - GitOps (Argo CD) and monitoring/logging planned for later stages.
 
-Stage 5 — Observability & Logging + Hardening
-- Goals: Deploy kube-prometheus-stack (Prometheus + Grafana), OpenTelemetry Collector, ELK stack on GKE using helmfile/helm charts managed by Terraform modules where possible. Create basic Grafana dashboards and ensure logs flow to Elasticsearch via Fluentd. Run CIS benchmark checks and automate periodic scans.
+  ## Quick start
+## Table of Contents
 
-Security checklist (examples)
------------------------------
-- Terraform state protected and access audited — Done (scaffolded)
-- Use of least-privilege IAM for service accounts — To be implemented
-- VPC private IPs for DB and Redis — To be implemented
-- Secrets in Secret Manager, not in repo — To be implemented
-- Image scanning in CI and runtime scans (GKE) — To be implemented
+- [Quick summary](#quick-summary)
+- [Quick start](#quick-start)
+- [Project layout (high level)](#project-layout-high-level)
+- [Stages (overview)](#stages-overview)
+- [Status — Stage 1](#status--stage-1)
+- [Contribution & branching](#contribution--branching)
+- [Next steps](#next-steps)
 
-Next steps — Stage 1 plan (detailed)
-------------------------------------
-I propose we start Stage 1 now. Concrete tasks I'll implement in Stage 1 in order:
-  1. Create Terraform backend resources: a secure GCS bucket + KMS/CMEK notes (or placeholders if KMS not available).
-  2. Write a reusable `network` module: VPC, private subnets, firewall rules.
-  3. Write a `gke` module: minimal private GKE cluster, one small node pool (preemptible/spot), enable Workload Identity.
-  4. Create `envs/dev` and `envs/prod` root configs with backend configuration and provider setup.
-  5. Add docs in `docs/` describing how to authenticate locally and from CI (service account key or Workload Identity for runners), and how to run `terraform init/plan/apply` safely.
 
-Tiny contract for Stage 1
-- Inputs: GCP project ID, region/zone, billing enabled, org policies (optional).
-- Outputs: GKE cluster kubeconfig, Terraform remote state location, service account emails/roles.
-- Error modes: missing APIs, insufficient permissions, quota limits. We'll add detection and helpful error messages.
+  1. Ensure you have gcloud authenticated and the project set:
 
-Edge cases
-- API quotas or missing APIs — guard via explicit API enablement steps.
-- Project-level restrictions (org policies) — document and provide remediation steps.
-- Long-running operations — use minimal resources and preemptible nodes; document cost expectations.
+  ```bash
+  gcloud auth login
+  gcloud config set project thedevopsproject
+  ```
 
-Quality gates
-- Terraform fmt & validate pass
-- A successful `terraform plan` for `dev`
-- Created GCS bucket with versioning and IAM policy
+  2. Bootstrap Terraform backend and providers:
 
-Files/folders created now
--------------------------
-- `README.md` - (this file) - describes project, stages, and next steps.
-- Empty folders: `infra/terraform/envs/dev`, `infra/terraform/envs/prod`, `infra/terraform/modules`, `apps/backend`, `apps/frontend`, `cicd`, `k8s/manifests`, `k8s/helm-charts`, `argocd`, `monitoring/helmfile`, `logging/elk`, `docs`.
+  ```bash
+  cd infra/terraform/bootstrap
+  terraform init
+  terraform plan -var 'project=thedevopsproject' -var 'region=europe-west4' -out=bootstrap-plan.tfplan
+  terraform apply "bootstrap-plan.tfplan"
+  ```
 
-Requirements coverage (mapping)
-- Terraform Provisioning: Planned in Stages 1-2 (Deferred)
-- Sample Application: Planned in Stage 3 (Deferred)
-- CI/CD Pipeline: Planned in Stage 3 (Deferred)
-- Deployment with GitOps: Planned in Stage 4 (Deferred)
-- Monitoring Stack: Planned in Stage 5 (Deferred)
-- Logging: Planned in Stage 5 (Deferred)
-- Everything as code, security, CIS: Documented and planned; implementation staged (Partially Done: repo scaffold)
+  3. Provision dev environment (example):
 
-Progress update
----------------
-I created the README and empty folder scaffold for the monorepo. Next I'll start implementing Stage 1: Terraform backend and network/GKE module skeletons. Would you like me to proceed and create the Terraform files and initial module skeletons now? If yes, I will implement a minimal working Terraform dev environment (backend + provider + network + gke module) and validate `terraform fmt`/`init`/`plan` locally or via a guidance script.
+  ```bash
+  cd ../envs/dev
+  terraform init
+  terraform apply -var-file=dev.tfvars
+  ```
 
-If you'd like any change to the stage breakdown or folder layout, tell me now; otherwise I'll proceed with Stage 1 implementation.
+  ## Project layout (high level)
+
+  - `infra/terraform/` — Terraform code and modules; `envs/dev` and `envs/prod` contain per-environment configs.
+  - `apps/` — sample application source (backend + frontend).
+  - `cicd/` — GitHub Actions and CI helpers.
+  - `k8s/` — Kubernetes manifests and Helm charts for GitOps.
+  - `docs/` — runbooks, security checklist, and stage runbooks.
+
+  ## Stages (overview)
+
+  We implement the project in five stages. Stage 1 (Foundation) is completed in this repo and includes:
+
+  - Terraform bootstrap (GCS state bucket created).
+  - `network`, `gke`, and `iam` module skeletons.
+  - `envs/dev` and `envs/prod` configs.
+
+  Later stages will add Cloud SQL/Redis, the sample app and CI/CD pipelines, Argo CD GitOps configuration, and observability/logging stacks.
+
+  ## Status — Stage 1
+
+  - Terraform state bucket: thedevopsproject-terraform-state — created
+  - Dev GKE cluster: created (zonal, cost-conscious node pool)
+  - Workload Identity: planned (bindings still to configure)
+
+  ## Contribution & branching
+
+  Recommended flow:
+
+  - `main` — protected production branch.
+  - `dev` — integration branch where feature branches are merged and applied to `envs/dev`.
+  - `feature/*` — short lived feature branches.
+
+  Terraform environments are separated by backend (env dirs) rather than by git branches.
+
+  ## Next steps
+
+  - Configure Workload Identity bindings for GKE.
+  - Implement Stage 2: Cloud SQL and Memorystore modules.
+  - Add CI workflows to run `terraform plan` on PRs and `apply` on merges with appropriate approvals.
+
+  ---
+
+  For details, see `docs/stage-1.md` and `docs/security-checklist.md`.
