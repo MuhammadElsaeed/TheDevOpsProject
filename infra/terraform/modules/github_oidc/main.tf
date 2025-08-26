@@ -37,6 +37,9 @@ resource "google_project_iam_member" "sa_owner" {
   member  = "serviceAccount:${google_service_account.github_actions_sa.email}"
 }
 
+# Grant Artifact Registry writer role so the CI service account can push images
+
+
 # Allow identities from the Workload Identity Pool filtered to the specific repository to impersonate the SA
 resource "google_service_account_iam_member" "allow_workload_identity" {
   service_account_id = google_service_account.github_actions_sa.name
