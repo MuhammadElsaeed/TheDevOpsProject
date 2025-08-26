@@ -103,6 +103,19 @@ module "gke" {
   zone        = "europe-west4-a"
 }
 
+# Install ArgoCD and create Applications (uses gcloud token fallback when run locally)
+module "argocd" {
+  source = "../../modules/argocd"
+
+  cluster_endpoint       = module.gke.endpoint
+  cluster_ca_certificate = module.gke.cluster_ca_certificate
+  kube_token             = "" # leave empty to use gcloud token when running locally or set via CI
+  repo_url               = "https://github.com/MuhammadElsaeed/TheDevOpsProject"
+  target_revision        = "dev"
+  backend_path           = "apps/backend/chart"
+  frontend_path          = "apps/frontend/chart"
+}
+
 module "sql" {
   source        = "../../modules/sql"
   enabled       = true
