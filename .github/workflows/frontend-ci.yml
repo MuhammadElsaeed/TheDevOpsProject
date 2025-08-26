@@ -1,0 +1,77 @@
+name: CI — Frontend
+
+on:
+  push:
+    branches: [ dev, main ]
+    paths:
+      - 'apps/frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    branches: [ dev, main ]
+    paths:
+      - 'apps/frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  workflow_dispatch: {}
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      IMAGE_REGISTRY: ${{ secrets.ARTIFACT_REGISTRY }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          cd apps/frontend
+          if [[ -f package-lock.json ]]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run unit tests
+        run: |
+          cd apps/frontend
+          npm test
+
+      - name: Build frontend image
+        id: build-frontend
+        run: |
+          IMAGE="${IMAGE_REGISTRY}/demo-frontend:${GITHUB_SHA}"
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          docker build -t "$IMAGE" apps/frontend
+
+      - name: Push frontend image
+        run: |
+          gcloud auth configure-docker --quiet
+          IMAGE="${{ steps.build-frontend.outputs.image }}"
+          docker push "$IMAGE"
+
+      - name: Tag and push env alias (frontend)
+        run: |
+          IMAGE="${{ steps.build-frontend.outputs.image }}"
+          if [[ "${GITHUB_REF}" == "refs/heads/dev" ]]; then
+            ALIAS="dev-latest"
+          else
+            ALIAS="prod-latest"
+          fi
+          IMAGE_ALIAS="${IMAGE_REGISTRY}/demo-frontend:${ALIAS}"
+          docker tag "$IMAGE" "$IMAGE_ALIAS"
+          docker push "$IMAGE_ALIAS"
+          echo "Pushed alias $IMAGE_ALIAS"
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.build-frontend.outputs.image }}
