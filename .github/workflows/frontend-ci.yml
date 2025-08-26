@@ -77,7 +77,8 @@ jobs:
 
       - name: Push frontend image
         run: |
-          gcloud auth configure-docker --quiet
+          REGISTRY_HOST="${IMAGE_REGISTRY%%/*}"
+          gcloud auth configure-docker "$REGISTRY_HOST" --quiet
           IMAGE="${{ steps.build-frontend.outputs.image }}"
           docker push "$IMAGE"
 
@@ -91,6 +92,8 @@ jobs:
           fi
           IMAGE_ALIAS="${IMAGE_REGISTRY}/demo-frontend:${ALIAS}"
           docker tag "$IMAGE" "$IMAGE_ALIAS"
+          REGISTRY_HOST="${IMAGE_REGISTRY%%/*}"
+          gcloud auth configure-docker "$REGISTRY_HOST" --quiet
           docker push "$IMAGE_ALIAS"
           echo "Pushed alias $IMAGE_ALIAS"
 

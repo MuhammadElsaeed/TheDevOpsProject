@@ -41,6 +41,7 @@ locals {
     "container.googleapis.com",
     "sqladmin.googleapis.com",
     "iam.googleapis.com",
+  "cloudresourcemanager.googleapis.com",
     "storage.googleapis.com",
     "cloudkms.googleapis.com",
     "redis.googleapis.com",

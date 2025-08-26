@@ -78,7 +78,9 @@ jobs:
 
       - name: Push Docker image to Artifact Registry
         run: |
-          gcloud auth configure-docker --quiet
+          # derive registry host from IMAGE_REGISTRY (e.g. europe-west4-docker.pkg.dev/theproject/repo)
+          REGISTRY_HOST="${IMAGE_REGISTRY%%/*}"
+          gcloud auth configure-docker "$REGISTRY_HOST" --quiet
           IMAGE="${{ steps.build.outputs.image }}"
           docker push "$IMAGE"
 
@@ -92,6 +94,8 @@ jobs:
           fi
           IMAGE_ALIAS="${IMAGE_REGISTRY}/demo-backend:${ALIAS}"
           docker tag "$IMAGE" "$IMAGE_ALIAS"
+          REGISTRY_HOST="${IMAGE_REGISTRY%%/*}"
+          gcloud auth configure-docker "$REGISTRY_HOST" --quiet
           docker push "$IMAGE_ALIAS"
           echo "Pushed alias $IMAGE_ALIAS"
 
