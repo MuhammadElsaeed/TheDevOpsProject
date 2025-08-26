@@ -33,9 +33,13 @@ jobs:
       - name: tfsec scan
         uses: docker://liamg/tfsec:latest
         with:
-          args: '/bin/sh -c "tfsec infra/terraform || true"'
+          # pass the directory directly as the container argument; do not wrap with shell -c
+          args: 'infra/terraform'
+        continue-on-error: true
 
       - name: terrascan scan
         uses: docker://accurics/terrascan:latest
         with:
-          args: '/bin/sh -c "terrascan scan -d infra/terraform || true"'
+          # terrascan's entrypoint expects 'scan -d <dir>' arguments
+          args: 'scan -d infra/terraform'
+        continue-on-error: true

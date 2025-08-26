@@ -29,3 +29,9 @@ variable "frontend_path" {
   type    = string
   default = "apps/frontend/chart"
 }
+
+variable "create_applications" {
+  type    = bool
+  default = false
+  description = "If true, the module will apply ArgoCD Application CRs from the repo. Set to true only after ArgoCD CRDs are installed."
+}

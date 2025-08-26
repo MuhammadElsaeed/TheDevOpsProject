@@ -86,6 +86,7 @@ module "network" {
   subnets = [
     { name = "private-subnet-1" , cidr = "10.10.0.0/24" },
   ]
+  enable_nat = true
 }
 
 module "gke" {
@@ -114,6 +115,7 @@ module "argocd" {
   target_revision        = "dev"
   backend_path           = "apps/backend/chart"
   frontend_path          = "apps/frontend/chart"
+  create_applications    = false
 }
 
 module "sql" {

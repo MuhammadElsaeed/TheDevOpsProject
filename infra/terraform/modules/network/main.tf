@@ -24,6 +24,27 @@ resource "google_compute_global_address" "psa_range" {
   network = google_compute_network.vpc.self_link
 }
 
+# Optional Cloud NAT to give private instances (GKE nodes without external IPs)
+# outbound internet access. Enabled by default for clusters created in this module.
+resource "google_compute_router" "nat_router" {
+  count   = var.enable_nat ? 1 : 0
+  name    = "${var.name}-nat-router"
+  network = google_compute_network.vpc.self_link
+  region  = var.region
+  project = var.project
+}
+
+resource "google_compute_router_nat" "default_nat" {
+  count = var.enable_nat ? 1 : 0
+  name   = "${var.name}-nat"
+  router = google_compute_router.nat_router[0].name
+  region = var.region
+  project = var.project
+
+  nat_ip_allocate_option = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+}
+
 # Create service networking peering to enable private services (Cloud SQL, Memorystore)
 resource "google_service_networking_connection" "private_vpc_connection" {
   network                 = google_compute_network.vpc.self_link
