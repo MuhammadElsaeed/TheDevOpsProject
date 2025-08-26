@@ -50,3 +50,9 @@ terraform.rc
 # Optional: ignore plan files saved before destroying Terraform configuration
 # Uncomment the line below if you want to ignore planout files.
 # planout
+
+# Node.js
+node_modules/
+npm-debug.log*
+package-lock.json
+yarn.lock
