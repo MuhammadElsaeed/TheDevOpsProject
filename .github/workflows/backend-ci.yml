@@ -49,7 +49,7 @@ jobs:
         uses: google-github-actions/auth@v1
         with:
           workload_identity_provider: "projects/931968123240/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
-          service_account_email: "github-actions-sa@thedevopsproject.iam.gserviceaccount.com"
+          service_account: "github-actions-sa@thedevopsproject.iam.gserviceaccount.com"
 
       - name: Configure gcloud
         uses: google-github-actions/setup-gcloud@v1

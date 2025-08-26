@@ -52,6 +52,17 @@ jobs:
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
           docker build -t "$IMAGE" apps/frontend
 
+      - name: Authenticate to Google Cloud using Workload Identity Federation
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: "projects/931968123240/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
+          service_account: "github-actions-sa@thedevopsproject.iam.gserviceaccount.com"
+
+      - name: Configure gcloud
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: thedevopsproject
+
       - name: Push frontend image
         run: |
           gcloud auth configure-docker --quiet
