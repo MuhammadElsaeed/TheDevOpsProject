@@ -63,18 +63,6 @@ jobs:
         with:
           project_id: thedevopsproject
 
-      - name: Verify authenticated account and permissions
-        run: |
-          echo "Active gcloud account:"
-          gcloud auth list --filter=status:ACTIVE --format="value(account)" || true
-          echo "gcloud config account:"
-          gcloud config get-value account || true
-          echo "Check project IAM bindings for the SA (may be empty if API restricted):"
-          gcloud projects get-iam-policy "$CLOUDSDK_CORE_PROJECT" \
-            --flatten="bindings[]" \
-            --filter="bindings.members:serviceAccount:github-actions-sa@thedevopsproject.iam.gserviceaccount.com" \
-            --format="table(bindings.role,bindings.members)" || true
-
       - name: Push frontend image
         run: |
           REGISTRY_HOST="${IMAGE_REGISTRY%%/*}"
