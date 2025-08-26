@@ -27,7 +27,13 @@ jobs:
       - name: Install dependencies
         run: |
           cd apps/backend
-          npm ci
+          # Use npm ci when package-lock.json exists (reproducible install).
+          # If the lockfile is not present (example: lightweight sample app), fall back to npm install.
+          if [[ -f package-lock.json ]]; then
+            npm ci
+          else
+            npm install
+          fi
 
       - name: Run unit tests
         run: |
