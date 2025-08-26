@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "demo-frontend.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "demo-frontend.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "demo-frontend.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "demo-frontend.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: demo-frontend
+          image: "{{- if .Values.image.registry }}{{ .Values.image.registry }}/{{ .Values.image.name }}:{{ .Values.image.tag }}{{- else }}{{ .Values.image.name }}:{{ .Values.image.tag }}{{- end }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}

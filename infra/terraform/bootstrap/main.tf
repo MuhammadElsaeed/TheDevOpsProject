@@ -8,6 +8,27 @@ terraform {
   }
 }
 
+module "github_oidc" {
+  source         = "../modules/github_oidc"
+  project        = var.project
+  pool_id        = var.github_oidc_pool_id
+  provider_id    = var.github_oidc_provider_id
+  sa_account_id  = var.github_sa_account_id
+  github_owner   = var.github_owner
+  github_repo    = var.github_repo
+}
+
+resource "google_artifact_registry_repository" "docker_repo" {
+  provider = google
+  project  = var.project
+  location = var.region
+  repository_id = var.artifact_repo_id
+  description = "Artifact Registry repository for container images"
+  format = "DOCKER"
+}
+
+
+
 provider "google" {
   project = var.project
   region  = var.region

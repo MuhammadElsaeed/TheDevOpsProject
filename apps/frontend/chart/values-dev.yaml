@@ -1,0 +1,6 @@
+replicaCount: 1
+image:
+  registry: "europe-west4-docker.pkg.dev/thedevopsproject/thedevops-repo"
+  name: demo-frontend
+  tag: dev-latest
+  pullPolicy: IfNotPresent

@@ -37,3 +37,37 @@ variable "kms_crypto_key_name" {
   type        = string
   default     = "tf-crypto-key"
 }
+
+variable "github_owner" {
+  description = "GitHub repository owner for Workload Identity trust (e.g. org or user)"
+  type        = string
+}
+
+variable "github_repo" {
+  description = "GitHub repository name for Workload Identity trust"
+  type        = string
+}
+
+variable "github_oidc_pool_id" {
+  description = "Workload Identity Pool id to create for GitHub Actions"
+  type        = string
+  default     = "github-actions-pool"
+}
+
+variable "github_oidc_provider_id" {
+  description = "Provider id inside the workload identity pool"
+  type        = string
+  default     = "github-provider"
+}
+
+variable "github_sa_account_id" {
+  description = "Service account account_id to create for GitHub Actions"
+  type        = string
+  default     = "github-actions-sa"
+}
+
+variable "artifact_repo_id" {
+  description = "Artifact Registry repository id to create for Docker images"
+  type        = string
+  default     = "thedevops-repo"
+}
