@@ -34,3 +34,8 @@ jobs:
         uses: docker://liamg/tfsec:latest
         with:
           args: '/bin/sh -c "tfsec infra/terraform || true"'
+
+      - name: terrascan scan
+        uses: docker://accurics/terrascan:latest
+        with:
+          args: '/bin/sh -c "terrascan scan -d infra/terraform || true"'
